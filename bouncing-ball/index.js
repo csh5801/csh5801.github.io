@@ -23,6 +23,9 @@
         this.load.image("spike", "assects/spike.png")
         this.load.image("ground", "assects/ground.png")
     }
+    function bounce() {
+       ball.setVelocityY(-250)
+    }
 
     function create() {
         ball = this.physics.add.sprite(100, 100, "ball")
@@ -32,7 +35,12 @@
         ball.body.gravity.y = 200;
         ball.setBounce(1)
         
-        this.physics.add.collider(ground, ball)
+        this.physics.add.collider(ground, ball, bounce)
+        
+
+         this.input.on("pointerdown", () => {
+             ball.setVelocityY(1000)
+         })
     }
         
      
