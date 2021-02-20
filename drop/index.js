@@ -17,7 +17,9 @@ const game = new Phaser.Game(config)
 
 let ball;
 let platforms;
-let ballOnPlatform = false;
+let ballOnPlatform = true;
+let score = 0;
+let scoreText;
 
 function topPlatform() {
     let topY = Infinity;
@@ -52,7 +54,12 @@ function hitPlatform(ball, platform) {
 
   if(platform !== topPlatform()) {
      this.scene.restart()
-  }
+     score = 0;
+  } else {
+     score += 1
+     scoreText.setText(score)
+     platform.setVelocityX(0) 
+ }
 }
 
 function preload() {
@@ -61,11 +68,14 @@ function preload() {
 }
 
 function create() {
+    scoreText = this.add.text(35, 35, score, { fontSize: "60px"})
+    scoreText.setScrollFactor(0, 0)
+
     ball = this.physics.add.sprite(375, 100, "ball")
     ball.setGravityY(1500)
     ball.setFrictionX(1)
 
-    this.cameras.main.startFollow(ball)
+    this.cameras.main.startFollow(ball, false, 1, 1, 0, -200)
 
     platforms = this.physics.add.group()
 
@@ -76,7 +86,7 @@ function create() {
 
 for (i = 0; i < 10; i++) {
     const x = Phaser.Math.Between(150, 600);
-    const y = 300 + i * 50
+    const y = 300 + i * 200
      let platform = platforms.create(x, y, "platform")
      platform.setImmovable(true)
      platform.setVelocityX(Phaser.Math.Between(100, 200))
@@ -84,16 +94,23 @@ for (i = 0; i < 10; i++) {
     }
 
     this.input.on("pointerdown", () => {
-        const y = bottomY() + 50      
-        topPlatform().setY(y)
+        const y = bottomY() + Phaser.Math.Between(200, 400)      
+        const topP = topPlatform()
+        topP.setY(y)
+        topP.setVelocityX(Phaser.Math.Between(100, 200))
         ballOnPlatform = false
     })
 }
 
 function update() {
     platforms.getChildren().forEach((platform) => {
-        if (platform.getBounds().right > 750 || platform.getBounds().left < 0) {
+        if (platform.getBounds().right > 700 || platform.getBounds().left < 50) {
           platform.setVelocityX(-platform.body.velocity.x)
         }
       })
+
+      if (ball.getBounds().top > bottomY()) {
+          this.scene.restart()
+          score = 0;
+      }
 }
